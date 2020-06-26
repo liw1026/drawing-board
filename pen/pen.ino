@@ -40,8 +40,8 @@ void setup()
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, pass);
 
-    // wait 10 seconds for connection:
-    delay(10000);
+    // wait 5 seconds for connection:
+    delay(5000);
   }
   Serial.println("Connected to wifi");
   printWiFiStatus();
@@ -81,7 +81,7 @@ void loop()
   int fsrReading = analogRead(fsrPin);
   int fsrSwitch = digitalRead(fsrPin);
 
-//  Serial.println(fsrReading);
+  Serial.println(fsrReading);
   // send a reply, to the IP address and port that sent us the packet we received
   Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
   char cstr[16];

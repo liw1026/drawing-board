@@ -6,13 +6,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
 
 import java.net.ConnectException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class MainActivity extends AppCompatActivity {
+import petrov.kristiyan.colorpicker.ColorPicker;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private PaintView paintView;
 
@@ -21,13 +24,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+
+        findViewById(R.id.btn_clear).setOnClickListener(this);
+        findViewById(R.id.btn_colour).setOnClickListener(this);
+        findViewById(R.id.btn_save).setOnClickListener(this);
 //        initMenu();
     }
 
     private void initView() {
         paintView = (PaintView) findViewById(R.id.activity_paint);
         new PenConnection().execute();
-        new PaletteConnection().execute();
+//        new PaletteConnection().execute();
     }
 
     private class PenConnection extends AsyncTask<Void, Void, Void> {
@@ -112,6 +119,37 @@ public class MainActivity extends AppCompatActivity {
         paintView.setStroke(Integer.parseInt(reply));
     }
     public void setColour(String reply) { paintView.setColour(Integer.parseInt(reply));}
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_clear:
+                paintView.clear();
+                break;
+            case R.id.btn_colour:
+//                Toast.makeText(MainActivity.this, "已点中图片", Toast.LENGTH_SHORT).show();
+                ColorPicker colorPicker = new ColorPicker(MainActivity.this);
+                colorPicker.show();
+                colorPicker.setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
+                    @Override
+                    public void onChooseColor(int position, int color) {
+                        paintView.setColour(color);
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+                break;
+            case R.id.btn_save:
+//                Toast.makeText(MainActivity.this, "已点中图片", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+    }
+
 }
 
 

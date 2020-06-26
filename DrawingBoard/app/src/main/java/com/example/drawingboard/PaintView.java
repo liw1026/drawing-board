@@ -16,7 +16,13 @@ import android.view.View;
 
 import androidx.annotation.ColorInt;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class PaintView extends View {
@@ -29,6 +35,7 @@ public class PaintView extends View {
     private Bitmap mBitmap;
     ArrayList<Path> mPaths = new ArrayList<Path>();
     ArrayList<Float> mStrokes = new ArrayList<Float>();
+    ArrayList<Integer> mColours = new ArrayList<>();
 
     private float lastTouchX;
     private float lastTouchY;
@@ -40,6 +47,7 @@ public class PaintView extends View {
     private static final float STROKE_INCREMENT = 0.2f; // amount to interpolate
     private float currentStroke = STROKE_WIDTH;
     private float targetStroke = STROKE_WIDTH;
+    private int currentColor = Color.BLACK;
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
@@ -72,13 +80,19 @@ public class PaintView extends View {
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(STROKE_WIDTH);
+
+        m_force = 0;
     }
 
     public void clear() {
         mPath.reset();
+        mPaths.clear();
+        mStrokes.clear();
+        mColours.clear();
         // Repaints the entire view.
         invalidate();
     }
+
 
     @Override
     protected void onDraw(Canvas canvas)  {
@@ -88,7 +102,7 @@ public class PaintView extends View {
         for(int i=0; i<mPaths.size();i++) {
 
 //            System.out.println("Stroke width: "+mPaths.size());
-
+            paint.setColor(mColours.get(i));
             paint.setStrokeWidth(mStrokes.get(i));
             canvas.drawPath(mPaths.get(i), paint);
         }
@@ -112,11 +126,20 @@ public class PaintView extends View {
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
+                if (m_force > 0) {
+//                    float normalization = (float) 20*(m_force-670)/(780-670)-3;
+                    float normalization = (float) 30*(m_force-840)/(905-840)-3;
+                    variableWidthDelta = (int) normalization;
+                    if (variableWidthDelta > 1) {
+                        targetStroke = variableWidthDelta;
+                    } else {
+                        targetStroke = 1;
+                    }
 
-                float normalization = (float) 20*(m_force-670)/(780-670)-3;
+                } else {
+                    targetStroke = currentStroke;
+                }
 
-                variableWidthDelta = (int) normalization;
-                targetStroke = variableWidthDelta;
 
                 if (currentStroke > 0) {
                     // if current not roughly equal to target
@@ -136,6 +159,7 @@ public class PaintView extends View {
 
 
                 mStrokes.add(currentStroke);
+                mColours.add(currentColor);
 
                 mPath.lineTo(mX, mY);
 
@@ -229,7 +253,7 @@ public class PaintView extends View {
     }
 
     public void setColour(int colour) {
-        paint.setColor(colour);
+        currentColor = colour;
     }
 }
 
